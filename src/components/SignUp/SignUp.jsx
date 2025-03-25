@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { auth } from "../../firebase.init";
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -13,16 +13,18 @@ const SignUp = () => {
     e.preventDefault();
     const email = e.target.email.value;
     const password = e.target.password.value;
+    const name = e.target.name.value;
+    const photo = e.target.photo.value;
     const terms = e.target.terms.checked;
 
-    console.log(email, password, terms);
+    console.log(email, password, terms, name, photo);
     // Regex to enforce password rules
     const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
 
     // reset states
     setErrorMessage('');
     setSuccess(false)
-    // setShowPassword(false)
+    
     if(password.length < 6){
       setErrorMessage('Password must be 6 characters or longer')
       return
@@ -39,6 +41,7 @@ const SignUp = () => {
     createUserWithEmailAndPassword(auth, email, password)
       .then(result =>{
         console.log(result.user);
+        // email verification added
         sendEmailVerification(auth.currentUser)
          .then(()=>{
           console.log('email verification link sent');
@@ -47,6 +50,20 @@ const SignUp = () => {
          .catch(error =>{
           setErrorMessage(error.message);
          })
+
+         const profile = {
+          'displayName': name,
+          'photoURL': photo,
+        }
+        updateProfile(auth.currentUser, profile)
+          .then(()=>{
+            console.log('Profile Updated!');
+            
+          })
+          .catch(error => {
+            console.log('Profile update error', error);
+            
+          })
         setSuccess(true);
       })
       .catch(error =>{
@@ -64,6 +81,18 @@ const SignUp = () => {
       <h1 className="text-5xl font-bold text-center mt-3">Sign Up</h1>
       <div className="card mx-auto bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
         <form onSubmit={handleSignUp} className="card-body">
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Name</span>
+            </label>
+            <input type="text" placeholder="name" name="name" className="input input-bordered" required />
+          </div>
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Photo URL</span>
+            </label>
+            <input type="text" placeholder="photo" name="photo" className="input input-bordered" required />
+          </div>
           <div className="form-control">
             <label className="label">
               <span className="label-text">Email</span>

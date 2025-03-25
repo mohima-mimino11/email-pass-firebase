@@ -1,11 +1,12 @@
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase.init";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 const Login = () => {
   const [success, setSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const emailRef = useRef();
   const handleLogin = (e) =>{
     e.preventDefault();
     const email = e.target.email.value;
@@ -17,12 +18,15 @@ const Login = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then(result=>{
         console.log(result.user);
+        // email verification checking for login
         if(!result.user.emailVerified){
           setErrorMessage('Please Verify Your email.')
         }
         else{
           setSuccess(true)
         }
+        
+        
       })
       .catch(error =>{
         console.log("Login Error", error.message);
@@ -30,6 +34,20 @@ const Login = () => {
       })
     
 
+  }
+
+  const handleForgotPassword = () =>{
+    const email = emailRef.current.value;
+    // console.log('give me an email', email);
+    // password reset method added
+    sendPasswordResetEmail(auth, email)
+      .then(()=>{
+        console.log('password reset email sent');
+        
+      })
+      .catch(error =>{
+        setErrorMessage(error.message)
+      })
   }
   return (
     <div className="hero bg-base-200 min-h-screen">
@@ -47,14 +65,14 @@ const Login = () => {
                 <label className="label">
                   <span className="label-text">Email</span>
                 </label>
-                <input type="email" name="email" placeholder="email" className="input input-bordered" required />
+                <input type="email" name="email" placeholder="email" ref={emailRef} className="input input-bordered" required />
               </div>
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Password</span>
                 </label>
                 <input type="password" name="password" placeholder="password" className="input input-bordered" required />
-                <label className="label">
+                <label onClick={handleForgotPassword} className="label">
                   <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
                 </label>
               </div>
