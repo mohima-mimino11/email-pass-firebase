@@ -1,33 +1,44 @@
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase.init";
 import { useState } from "react";
-import { FaEye } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 
 const SignUp = () => {
   const [errorMessage, setErrorMessage] = useState('');
+  const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const handleSignUp = e =>{
     e.preventDefault();
     const email = e.target.email.value;
     const password = e.target.password.value;
-    console.log(email, password);
+    const terms = e.target.terms.checked;
+
+    console.log(email, password, terms);
     // Regex to enforce password rules
     const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
 
     // reset states
     setErrorMessage('');
+    setSuccess(false)
     // setShowPassword(false)
     if(password.length < 6){
       setErrorMessage('Password must be 6 characters or longer')
+      return
     }
     if(!passwordRegex.test(password)){
       setErrorMessage('Password Needs  at one uppercase, at least one lowercase, at least one number and at least one special character.')
+      return
+    }
+
+    if(!terms){
+      setErrorMessage("Please Accept Our terms and conditions")
     }
     // create user with email and password
     createUserWithEmailAndPassword(auth, email, password)
       .then(result =>{
         console.log(result.user);
+        setSuccess(true);
       })
       .catch(error =>{
         console.log("Sign Up error:", error);
@@ -50,12 +61,21 @@ const SignUp = () => {
             <label className="label">
               <span className="label-text">Password</span>
             </label>
-            <button onClick={() => setShowPassword(!showPassword)} className="btn btn-xs absolute ">
-              <FaEye></FaEye>
+            <button onClick={() => setShowPassword(!showPassword)} className="btn btn-xs absolute right-6 top-6 z-10">
+              {
+                showPassword ? <FaEyeSlash></FaEyeSlash> : <FaEye></FaEye>
+              }
+              
             </button>
             <input type={showPassword ? 'text' : 'password'} placeholder="password" name="password" className="input input-bordered" required />
             <label className="label">
               <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
+            </label>
+          </div>
+          <div className="form-control">
+            <label className="label cursor-pointer">
+              <input type="checkbox" name="terms" className="checkbox" />
+              <span className="label-text">Accept Our Terms and Conditions</span>
             </label>
           </div>
           <div className="form-control mt-6">
@@ -63,6 +83,9 @@ const SignUp = () => {
           </div>
           {
             errorMessage && <p className="text-red-500">{errorMessage}</p>
+          }
+          {
+            success && <p className="text-green-400">Sign Up Successful!</p>
           }
           
         </form>
