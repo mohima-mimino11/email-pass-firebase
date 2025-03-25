@@ -1,7 +1,8 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "../../firebase.init";
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 
 const SignUp = () => {
@@ -38,6 +39,14 @@ const SignUp = () => {
     createUserWithEmailAndPassword(auth, email, password)
       .then(result =>{
         console.log(result.user);
+        sendEmailVerification(auth.currentUser)
+         .then(()=>{
+          console.log('email verification link sent');
+          
+         })
+         .catch(error =>{
+          setErrorMessage(error.message);
+         })
         setSuccess(true);
       })
       .catch(error =>{
@@ -45,6 +54,10 @@ const SignUp = () => {
         
       })
     
+  }
+
+  const showPasswordBtn = () =>{
+    setShowPassword(!showPassword)
   }
   return (
     <div className="space-y-6">
@@ -61,7 +74,7 @@ const SignUp = () => {
             <label className="label">
               <span className="label-text">Password</span>
             </label>
-            <button onClick={() => setShowPassword(!showPassword)} className="btn btn-xs absolute right-6 top-6 z-10">
+            <button onClick={() => showPasswordBtn() } className="btn btn-xs absolute right-6 top-6 z-10">
               {
                 showPassword ? <FaEyeSlash></FaEyeSlash> : <FaEye></FaEye>
               }
@@ -81,6 +94,7 @@ const SignUp = () => {
           <div className="form-control mt-6">
             <button className="btn btn-primary btn-wide">Sign Up</button>
           </div>
+          <p className="m-2">Already have an account? Please <Link to="/login">Login!</Link> </p>
           {
             errorMessage && <p className="text-red-500">{errorMessage}</p>
           }

@@ -1,6 +1,7 @@
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase.init";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const [success, setSuccess] = useState(false);
@@ -16,7 +17,12 @@ const Login = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then(result=>{
         console.log(result.user);
-        setSuccess(true)
+        if(!result.user.emailVerified){
+          setErrorMessage('Please Verify Your email.')
+        }
+        else{
+          setSuccess(true)
+        }
       })
       .catch(error =>{
         console.log("Login Error", error.message);
@@ -55,6 +61,7 @@ const Login = () => {
               <div className="form-control mt-6">
                 <button className="btn btn-primary">Login</button>
               </div>
+              <p className="m-2">Don't Have any account? Please <Link to="/signUp">Sign Up!</Link> </p>
               {
                 success && <p className="text-green-400">Login Successful!</p>
               }
